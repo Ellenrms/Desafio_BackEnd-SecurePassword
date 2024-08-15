@@ -2,16 +2,30 @@ package com.ellenmateus.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.ellenmateus.service.PasswordService;
 
 @RestController
 public class ApiController {
-	
-	@PostMapping(name = "/validate-password")
-	public ResponseEntity<?> validatePassword(){
-		
-		
-		return ResponseEntity.noContent().build();
+
+	private final PasswordService passwordService;
+
+	public ApiController(PasswordService passwordService) {
+		this.passwordService = passwordService;
 	}
 
-}
+	@PostMapping(value = "/validate-password")
+	public ResponseEntity<FailureResponse> validatePassword(@RequestBody BodyRequest request){
+		
+		var failures = passwordService.validatePass(request.password());
+		
+		if (failures.isEmpty()) {
+		return ResponseEntity.noContent().build();
+		}
+
+	return ResponseEntity.badRequest().body(new FailureResponse(failures));
+
+	}
+	}
